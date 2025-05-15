@@ -12,7 +12,7 @@ The application follows Clean Architecture principles with the following layers:
 4. **Presentation Layer**: REST controllers and scheduled jobs
 
  **Architecture Diagram**
- ![Architecture Diagram]
+ (diagrams/Architecture.jpg)
 
 ## Features
 
