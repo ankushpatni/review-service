@@ -107,9 +107,9 @@ Configuration can be provided via environment variables or updated in `applicati
 ## To run application with BLUE GREEN deployment.
   - (Windows, where I made the project)To switch traffic, comment/uncomment the server line in nginx.conf, and reload or restart the nginx container.
   - (Linux platform)To reload the nginx configuration without downtime, run:
-    chmod +x deploy.sh
-    ./deploy.sh green   # deploy green, stop blue, update Nginx
-    ./deploy.sh blue    # deploy blue, stop green, update Nginx
+    -chmod +x deploy.sh
+    -./deploy.sh green   # deploy green, stop blue, update Nginx
+    -./deploy.sh blue    # deploy blue, stop green, update Nginx
 
 docker-compose restart nginx
 
