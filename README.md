@@ -77,13 +77,13 @@ This will start:
 mvn clean package
 ```
 
-3. Run the application (It will not help as it needs configuration for AWS, Kafka and DB):
+3. Run the application (It needs configuration for AWS, Kafka and DB):
 
 ```bash
 java -jar target/review-service-1.0.0.jar
 ```
 
-Note: When running locally, you'll need to configure database and AWS settings in `application.yml` or via environment variables.
+Note: When running locally, you'll need to configure database, kafka and AWS settings in `application.yml` or via environment variables.
 
 ## Configuration
 
@@ -107,7 +107,7 @@ Configuration can be provided via environment variables or updated in `applicati
 ## To run application with BLUE GREEN deployment.
   - (Windows, where I made the project)To switch traffic, comment/uncomment the server line in nginx.conf, and reload or restart the nginx container.
   - (Linux platform)To reload the nginx configuration without downtime, run:
-    chmod +x deploy.sh
+     chmod +x deploy.sh
     ./deploy.sh green   # deploy green, stop blue, update Nginx
     ./deploy.sh blue    # deploy blue, stop green, update Nginx
 
