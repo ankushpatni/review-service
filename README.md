@@ -8,7 +8,7 @@ The application follows Clean Architecture principles with the following layers:
 
 1. **Domain Layer**: Core business entities and repository interfaces
 2. **Application Layer**: Services that implement business logic
-3. **Infrastructure Layer**: External service implementations, database access
+3. **Infrastructure Layer**: External service implementations, database access, kafka 
 4. **Presentation Layer**: REST controllers and scheduled jobs
 
 ## Features
