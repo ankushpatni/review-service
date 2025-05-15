@@ -15,6 +15,7 @@ The application follows Clean Architecture principles with the following layers:
 
 - Connects to AWS S3 to retrieve review files in JSONL format
 - Processes reviews, handling validation and data transformation
+- Push each review in Kafka
 - Stores processed reviews in a PostgreSQL database
 - Supports idempotent processing with tracking of processed files
 - Provides both scheduled processing and manual triggers via REST API
