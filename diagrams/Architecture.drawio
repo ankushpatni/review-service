@@ -79,7 +79,7 @@
         <mxCell id="18LhkL2Vf4VFiMgtXKWE-5" value="Enduser submit review" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1">
           <mxGeometry x="50" y="580" width="30" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="18LhkL2Vf4VFiMgtXKWE-7" value="Live Review&amp;nbsp;&lt;div&gt;service&amp;nbsp;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="18LhkL2Vf4VFiMgtXKWE-7" value="Live Review&amp;nbsp;&lt;div&gt;service/ Lambda&amp;nbsp;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="270" y="590" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="18LhkL2Vf4VFiMgtXKWE-12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.63;entryY=1.033;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="UB9DZYSupl-qanN3jUrm-20" target="UB9DZYSupl-qanN3jUrm-16">
@@ -101,6 +101,23 @@
         </mxCell>
         <mxCell id="18LhkL2Vf4VFiMgtXKWE-15" value="" style="outlineConnect=0;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;shape=mxgraph.aws3.api_gateway;fillColor=#D9A741;gradientColor=none;" vertex="1" parent="1">
           <mxGeometry x="160" y="390" width="56.5" height="76.5" as="geometry" />
+        </mxCell>
+        <mxCell id="18LhkL2Vf4VFiMgtXKWE-30" value="Future Expansion" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="270" y="650" width="120" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="18LhkL2Vf4VFiMgtXKWE-31" value="" style="image;sketch=0;aspect=fixed;html=1;points=[];align=center;fontSize=12;image=img/lib/mscae/Cache_Redis_Product.svg;" vertex="1" parent="1">
+          <mxGeometry x="600" y="270" width="50" height="42" as="geometry" />
+        </mxCell>
+        <mxCell id="18LhkL2Vf4VFiMgtXKWE-32" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.3;entryY=0.89;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="UB9DZYSupl-qanN3jUrm-11" target="18LhkL2Vf4VFiMgtXKWE-31">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="550" y="450" />
+              <mxPoint x="550" y="307" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="18LhkL2Vf4VFiMgtXKWE-33" value="Future Expansion,&lt;br&gt;Cache Hotels and Review data&lt;br&gt;&amp;nbsp;for fast retrieval" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="545" y="215" width="190" height="60" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
