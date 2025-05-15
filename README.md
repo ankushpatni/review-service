@@ -11,6 +11,9 @@ The application follows Clean Architecture principles with the following layers:
 3. **Infrastructure Layer**: External service implementations, database access, kafka 
 4. **Presentation Layer**: REST controllers and scheduled jobs
 
+ **Architecture Diagram**
+ ![Architecture Diagram](diagrams/Architecture.jpg)
+
 ## Features
 
 - Connects to AWS S3 to retrieve review files in JSONL format
@@ -147,8 +150,12 @@ The database schema includes the following tables:
 
 ## Testing
 
-The project includes unit tests for core components. To run the tests:
+The project includes unit tests for core components and has coverage more than 80%. To run the tests:
 
 ```bash
 mvn test
 ```
+## Future Expansion 
+1. Dead Letter queue in consumer for failed reviews reporting.
+2. Direct consumption of reviews from providers through the kafka/Lambda.
+3. Have caching mechanism for hotels/reviews so that new reviews can be processed easily.
