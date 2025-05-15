@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ReviewServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Review Service</a> &gt; <a href="index.source.html" class="el_package">com.zuzu.reviewservice.application.service.impl</a> &gt; <span class="el_source">ReviewServiceImpl.java</span></div><h1>ReviewServiceImpl.java</h1><pre class="source lang-java linenums">package com.zuzu.reviewservice.application.service.impl;
+
+import com.zuzu.reviewservice.application.dto.ReviewCommentDto;
+import com.zuzu.reviewservice.application.dto.ReviewDto;
+import com.zuzu.reviewservice.application.dto.ReviewerInfoDto;
+import com.zuzu.reviewservice.application.service.ReviewService;
+import com.zuzu.reviewservice.domain.model.Hotel;
+import com.zuzu.reviewservice.domain.model.Review;
+import com.zuzu.reviewservice.domain.model.ReviewProvider;
+import com.zuzu.reviewservice.domain.model.ReviewResponse;
+import com.zuzu.reviewservice.domain.repository.HotelRepository;
+import com.zuzu.reviewservice.domain.repository.ReviewProviderRepository;
+import com.zuzu.reviewservice.domain.repository.ReviewRepository;
+import com.zuzu.reviewservice.domain.repository.ReviewResponseRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Optional;
+
+@Service
+<span class="fc" id="L28">@RequiredArgsConstructor</span>
+<span class="fc" id="L29">@Slf4j</span>
+public class ReviewServiceImpl implements ReviewService {
+
+    private final ReviewRepository reviewRepository;
+    private final ReviewResponseRepository reviewResponseRepository;
+    private final HotelRepository hotelRepository;
+    private final ReviewProviderRepository reviewProviderRepository;
+
+    @Override
+    @Transactional
+    public void saveReview(ReviewDto reviewDto) {
+        try {
+<span class="pc bpc" id="L41" title="1 of 4 branches missed.">            if (reviewDto == null || reviewDto.getComment() == null) {</span>
+<span class="fc" id="L42">                log.warn(&quot;Invalid review data, skipping&quot;);</span>
+<span class="fc" id="L43">                return;</span>
+            }
+
+<span class="fc" id="L46">            ReviewCommentDto commentDto = reviewDto.getComment();</span>
+            /*if(reviewDto.getHotelName() == null || reviewDto.getHotelName().isEmpty()) {
+                log.warn(&quot;Hotel name is missing, skipping review&quot;);
+                return;
+            }*/
+            // 1. Get or create hotel
+<span class="fc" id="L52">            Optional&lt;Hotel&gt; hotel = hotelRepository.findById(reviewDto.getHotelId().longValue());</span>
+<span class="fc bfc" id="L53" title="All 2 branches covered.">            if(hotel.isEmpty()) {</span>
+<span class="fc" id="L54">                hotel = Optional.ofNullable(Hotel.builder()</span>
+<span class="fc" id="L55">                        .id(reviewDto.getHotelId().intValue())</span>
+<span class="fc" id="L56">                        .name(reviewDto.getHotelName())</span>
+<span class="fc" id="L57">                        .build());</span>
+<span class="nc" id="L58">                hotel = Optional.of(hotelRepository.save(hotel.get()));</span>
+            }
+
+            // 2. Get provider
+<span class="fc" id="L62">            ReviewProvider provider = reviewProviderRepository.findByName(reviewDto.getPlatform())</span>
+<span class="fc" id="L63">                    .orElseThrow(() -&gt; new IllegalStateException(</span>
+<span class="fc" id="L64">                            &quot;Provider not found: &quot; + reviewDto.getPlatform()));</span>
+
+            // 3. Check if review already exists
+<span class="fc" id="L67">            Optional&lt;Review&gt; existingReview = reviewRepository.findByProviderReviewIdAndProvider(</span>
+<span class="fc" id="L68">                    commentDto.getHotelReviewId().longValue(), provider);</span>
+            
+<span class="fc bfc" id="L70" title="All 2 branches covered.">            if (existingReview.isPresent()) {</span>
+<span class="fc" id="L71">                log.debug(&quot;Review already exists, skipping: {} for provider {}&quot;,</span>
+<span class="fc" id="L72">                        commentDto.getHotelReviewId(), provider.getName());</span>
+<span class="fc" id="L73">                return;</span>
+            }
+
+            // 4. Parse dates
+<span class="fc" id="L77">            LocalDateTime reviewDate = null;</span>
+<span class="fc bfc" id="L78" title="All 4 branches covered.">            if (commentDto.getReviewDate() != null &amp;&amp; !commentDto.getReviewDate().isEmpty()) {</span>
+                try {
+<span class="fc" id="L80">                    reviewDate = ZonedDateTime.parse(commentDto.getReviewDate(), </span>
+<span class="fc" id="L81">                            DateTimeFormatter.ISO_OFFSET_DATE_TIME).toLocalDateTime();</span>
+<span class="fc" id="L82">                } catch (Exception e) {</span>
+<span class="fc" id="L83">                    log.warn(&quot;Could not parse review date: {}&quot;, commentDto.getReviewDate());</span>
+<span class="fc" id="L84">                    reviewDate = LocalDateTime.now(); // Fallback</span>
+<span class="fc" id="L85">                }</span>
+            } else {
+<span class="fc" id="L87">                reviewDate = LocalDateTime.now(); // Fallback</span>
+            }
+
+            // 5. Create and save review
+<span class="fc" id="L91">            Review review = Review.builder()</span>
+<span class="fc" id="L92">                    .providerReviewId(commentDto.getHotelReviewId().longValue())</span>
+<span class="fc" id="L93">                    .provider(provider)</span>
+<span class="fc" id="L94">                    .hotel(hotel.get())</span>
+<span class="fc bfc" id="L95" title="All 2 branches covered.">                    .rating(commentDto.getRating() != null ? </span>
+<span class="fc" id="L96">                            BigDecimal.valueOf(commentDto.getRating()) : null)</span>
+<span class="fc" id="L97">                    .ratingText(commentDto.getRatingText())</span>
+<span class="fc" id="L98">                    .reviewDate(reviewDate)</span>
+<span class="fc" id="L99">                    .reviewTitle(commentDto.getReviewTitle())</span>
+<span class="fc" id="L100">                    .reviewComments(commentDto.getReviewComments())</span>
+<span class="fc" id="L101">                    .reviewPositives(commentDto.getReviewPositives())</span>
+<span class="fc" id="L102">                    .reviewNegatives(commentDto.getReviewNegatives())</span>
+<span class="fc" id="L103">                    .formattedRating(commentDto.getFormattedRating())</span>
+<span class="fc" id="L104">                    .translateSource(commentDto.getTranslateSource())</span>
+<span class="fc" id="L105">                    .translateTarget(commentDto.getTranslateTarget())</span>
+<span class="fc" id="L106">                    .checkInDate(commentDto.getCheckInDateMonthAndYear())</span>
+<span class="fc" id="L107">                    .build();</span>
+
+            // 6. Add reviewer information if available
+<span class="fc" id="L110">            ReviewerInfoDto reviewerInfo = commentDto.getReviewerInfo();</span>
+<span class="fc bfc" id="L111" title="All 2 branches covered.">            if (reviewerInfo != null) {</span>
+<span class="fc" id="L112">                review.setReviewerCountry(reviewerInfo.getCountryName());</span>
+<span class="fc" id="L113">                review.setReviewerName(reviewerInfo.getDisplayMemberName());</span>
+<span class="fc" id="L114">                review.setReviewerType(reviewerInfo.getReviewGroupName());</span>
+<span class="fc" id="L115">                review.setRoomType(reviewerInfo.getRoomTypeName());</span>
+<span class="fc" id="L116">                review.setLengthOfStay(reviewerInfo.getLengthOfStay());</span>
+            }
+
+<span class="fc" id="L119">            review = reviewRepository.save(review);</span>
+            
+            // 7. Save response if exists
+<span class="pc bpc" id="L122" title="1 of 4 branches missed.">            if (commentDto.getResponderName() != null &amp;&amp; !commentDto.getResponderName().isEmpty()) {</span>
+<span class="fc" id="L123">                LocalDateTime responseDate = null;</span>
+<span class="pc bpc" id="L124" title="1 of 2 branches missed.">                if (commentDto.getFormattedResponseDate() != null &amp;&amp; </span>
+<span class="nc bnc" id="L125" title="All 2 branches missed.">                        !commentDto.getFormattedResponseDate().isEmpty()) {</span>
+                    try {
+                        // Try to parse formatted date, but this is often not in a standard format
+<span class="nc" id="L128">                        responseDate = LocalDateTime.now(); // Fallback</span>
+<span class="nc" id="L129">                    } catch (Exception e) {</span>
+<span class="nc" id="L130">                        responseDate = LocalDateTime.now();</span>
+<span class="nc" id="L131">                    }</span>
+                } else {
+<span class="fc" id="L133">                    responseDate = LocalDateTime.now();</span>
+                }
+                
+<span class="fc" id="L136">                ReviewResponse response = ReviewResponse.builder()</span>
+<span class="fc" id="L137">                        .review(review)</span>
+<span class="fc" id="L138">                        .responderName(commentDto.getResponderName())</span>
+<span class="fc" id="L139">                        .responseDate(responseDate)</span>
+<span class="fc" id="L140">                        .responseText(commentDto.getResponseDateText())</span>
+<span class="fc" id="L141">                        .build();</span>
+                
+<span class="nc" id="L143">                reviewResponseRepository.save(response);</span>
+            }
+            
+<span class="fc" id="L146">            log.debug(&quot;Successfully saved review: {} for hotel: {}&quot;, </span>
+<span class="fc" id="L147">                    commentDto.getHotelReviewId(), reviewDto.getHotelId());</span>
+            
+<span class="fc" id="L149">        } catch (Exception e) {</span>
+<span class="fc" id="L150">            log.error(&quot;Error saving review: {}&quot;, e.getMessage(), e);</span>
+<span class="fc" id="L151">            throw new RuntimeException(&quot;Error saving review data&quot;, e);</span>
+<span class="fc" id="L152">        }</span>
+<span class="fc" id="L153">    }</span>
+
+    @Override
+    public List&lt;ReviewDto&gt; getReviewsByHotelId(Integer hotelId) {
+<span class="fc" id="L157">        List&lt;Review&gt; reviews = reviewRepository.findByHotelId(hotelId);</span>
+
+<span class="fc bfc" id="L159" title="All 4 branches covered.">        if (reviews == null || reviews.isEmpty()) {</span>
+<span class="fc" id="L160">            log.warn(&quot;No reviews found for hotel ID: {}&quot;, hotelId);</span>
+<span class="fc" id="L161">            return List.of();</span>
+        }
+
+<span class="fc" id="L164">        return reviews.stream().map(review -&gt; ReviewDto.builder()</span>
+<span class="fc" id="L165">                        .hotelId(review.getHotel().getId())</span>
+<span class="fc" id="L166">                        .hotelName(review.getHotel().getName())</span>
+<span class="fc" id="L167">                        .platform(review.getProvider().getName())</span>
+<span class="fc" id="L168">                        .comment(ReviewCommentDto.builder()</span>
+<span class="fc" id="L169">                                .hotelReviewId(review.getProviderReviewId().intValue())</span>
+<span class="fc" id="L170">                                .reviewTitle(review.getReviewTitle())</span>
+<span class="fc" id="L171">                                .reviewComments(review.getReviewComments())</span>
+<span class="fc" id="L172">                                .reviewPositives(review.getReviewPositives())</span>
+<span class="fc" id="L173">                                .reviewNegatives(review.getReviewNegatives())</span>
+<span class="pc bpc" id="L174" title="1 of 2 branches missed.">                                .rating(review.getRating() != null ? review.getRating().doubleValue() : null)</span>
+<span class="fc" id="L175">                                .ratingText(review.getRatingText())</span>
+<span class="pc bpc" id="L176" title="1 of 2 branches missed.">                                .reviewDate(review.getReviewDate() != null ? review.getReviewDate().toString() : null)</span>
+<span class="fc" id="L177">                                .build())</span>
+<span class="fc" id="L178">                        .build())</span>
+<span class="fc" id="L179">                .toList();</span>
+    }
+} 
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

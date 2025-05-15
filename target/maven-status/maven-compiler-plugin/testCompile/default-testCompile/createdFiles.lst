@@ -1,0 +1,2 @@
+com\zuzu\reviewservice\application\service\ReviewServiceTest.class
+com\zuzu\reviewservice\infrastructure\s3\S3ServiceTest.class

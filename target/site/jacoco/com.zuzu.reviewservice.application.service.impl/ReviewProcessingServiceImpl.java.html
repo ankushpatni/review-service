@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ReviewProcessingServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Review Service</a> &gt; <a href="index.source.html" class="el_package">com.zuzu.reviewservice.application.service.impl</a> &gt; <span class="el_source">ReviewProcessingServiceImpl.java</span></div><h1>ReviewProcessingServiceImpl.java</h1><pre class="source lang-java linenums">package com.zuzu.reviewservice.application.service.impl;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.zuzu.reviewservice.application.dto.ReviewDto;
+import com.zuzu.reviewservice.application.service.ProcessedFileService;
+import com.zuzu.reviewservice.application.service.ReviewProcessingService;
+import com.zuzu.reviewservice.application.service.ReviewService;
+import com.zuzu.reviewservice.application.service.S3Service;
+import com.zuzu.reviewservice.domain.model.ProcessedFile;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+
+@Service
+<span class="nc" id="L26">@RequiredArgsConstructor</span>
+<span class="nc" id="L27">@Slf4j</span>
+public class ReviewProcessingServiceImpl implements ReviewProcessingService {
+
+    private final S3Service s3Service;
+    private final ReviewService reviewService;
+    private final ProcessedFileService processedFileService;
+    private final ObjectMapper objectMapper;
+
+    @Value(&quot;${aws.s3.prefix}&quot;)
+    private String s3Prefix;
+
+    @Value(&quot;${review-service.processing.processed-files-tracking-enabled:true}&quot;)
+    private boolean processedFilesTrackingEnabled;
+
+    @Override
+    public void processNewReviewFiles() {
+        try {
+<span class="nc" id="L44">            log.info(&quot;Starting to process new review files from S3...&quot; + s3Prefix);</span>
+            // 1. List all files in the S3 bucket
+<span class="nc" id="L46">            List&lt;String&gt; allFiles = s3Service.listFiles(s3Prefix);</span>
+<span class="nc" id="L47">            log.info(&quot;Found {} files in S3 bucket with prefix: {}&quot;, allFiles.size(), s3Prefix);</span>
+            
+            // 2. Find files that haven't been processed yet
+<span class="nc" id="L50">            List&lt;String&gt; newFiles = findNewFiles(allFiles);</span>
+<span class="nc" id="L51">            log.info(&quot;Found {} new files to process&quot;, newFiles.size());</span>
+            
+            // 3. Process each new file asynchronously
+<span class="nc" id="L54">            List&lt;CompletableFuture&lt;ProcessedFile&gt;&gt; futures = new ArrayList&lt;&gt;();</span>
+            
+<span class="nc bnc" id="L56" title="All 2 branches missed.">            for (String fileName : newFiles) {</span>
+                try {
+<span class="nc" id="L58">                    InputStream fileContent = s3Service.downloadFile(fileName);</span>
+<span class="nc" id="L59">                    CompletableFuture&lt;ProcessedFile&gt; future = processFile(fileName, fileContent);</span>
+<span class="nc" id="L60">                    futures.add(future);</span>
+<span class="nc" id="L61">                } catch (Exception e) {</span>
+<span class="nc" id="L62">                    log.error(&quot;Error downloading file {}: {}&quot;, fileName, e.getMessage(), e);</span>
+<span class="nc" id="L63">                }</span>
+<span class="nc" id="L64">            }</span>
+            
+            // 4. Wait for all tasks to complete
+<span class="nc" id="L67">            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();</span>
+            
+<span class="nc" id="L69">            log.info(&quot;Completed processing {} files&quot;, newFiles.size());</span>
+<span class="nc" id="L70">        } catch (Exception e) {</span>
+<span class="nc" id="L71">            log.error(&quot;Error processing review files: {}&quot;, e.getMessage(), e);</span>
+<span class="nc" id="L72">        }</span>
+<span class="nc" id="L73">    }</span>
+
+    @Override
+    @Async(&quot;taskExecutor&quot;)
+    public CompletableFuture&lt;ProcessedFile&gt; processFile(String fileName, InputStream fileContent) {
+<span class="nc" id="L78">        log.info(&quot;Processing file: {}&quot;, fileName);</span>
+<span class="nc" id="L79">        int recordsProcessed = 0;</span>
+<span class="nc" id="L80">        int recordsFailed = 0;</span>
+
+<span class="nc" id="L82">        try (BufferedReader reader = new BufferedReader(new InputStreamReader(fileContent))) {</span>
+            String line;
+<span class="nc bnc" id="L84" title="All 2 branches missed.">            while ((line = reader.readLine()) != null) {</span>
+<span class="nc bnc" id="L85" title="All 2 branches missed.">                if (line.trim().isEmpty()) {</span>
+<span class="nc" id="L86">                    continue;</span>
+                }
+                
+                try {
+<span class="nc" id="L90">                    ReviewDto reviewDto = objectMapper.readValue(line, ReviewDto.class);</span>
+<span class="nc" id="L91">                    reviewService.saveReview(reviewDto);</span>
+<span class="nc" id="L92">                    recordsProcessed++;</span>
+<span class="nc" id="L93">                } catch (Exception e) {</span>
+<span class="nc" id="L94">                    log.error(&quot;Error processing review from file {}: {}&quot;, fileName, e.getMessage());</span>
+<span class="nc" id="L95">                    recordsFailed++;</span>
+<span class="nc" id="L96">                }</span>
+            }
+            
+<span class="nc" id="L99">            ProcessedFile.ProcessingStatus status = determineStatus(recordsProcessed, recordsFailed);</span>
+            
+            // Only mark file as processed if tracking is enabled
+<span class="nc bnc" id="L102" title="All 2 branches missed.">            if (processedFilesTrackingEnabled) {</span>
+<span class="nc" id="L103">                return CompletableFuture.completedFuture(</span>
+<span class="nc" id="L104">                        processedFileService.markFileAsProcessed(fileName, status, recordsProcessed, recordsFailed)</span>
+                );
+            } else {
+<span class="nc" id="L107">                log.info(&quot;Processed file {} with status {}: {} processed, {} failed&quot;, </span>
+<span class="nc" id="L108">                         fileName, status, recordsProcessed, recordsFailed);</span>
+<span class="nc" id="L109">                return CompletableFuture.completedFuture(null);</span>
+            }
+<span class="nc" id="L111">        } catch (IOException e) {</span>
+<span class="nc" id="L112">            log.error(&quot;Error reading file {}: {}&quot;, fileName, e.getMessage(), e);</span>
+            
+<span class="nc bnc" id="L114" title="All 2 branches missed.">            if (processedFilesTrackingEnabled) {</span>
+<span class="nc" id="L115">                return CompletableFuture.completedFuture(</span>
+<span class="nc" id="L116">                        processedFileService.markFileAsProcessed(</span>
+                                fileName, ProcessedFile.ProcessingStatus.FAILED, recordsProcessed, recordsFailed)
+                );
+            } else {
+<span class="nc" id="L120">                return CompletableFuture.completedFuture(null);</span>
+            }
+        }
+    }
+
+    @Override
+    public List&lt;String&gt; findNewFiles(List&lt;String&gt; allFiles) {
+<span class="nc bnc" id="L127" title="All 2 branches missed.">        if (!processedFilesTrackingEnabled) {</span>
+<span class="nc" id="L128">            return allFiles; // Process all files if tracking is disabled</span>
+        }
+        
+<span class="nc" id="L131">        List&lt;String&gt; processedFiles = processedFileService.getAllProcessedFileNames();</span>
+<span class="nc" id="L132">        return allFiles.stream()</span>
+<span class="nc bnc" id="L133" title="All 2 branches missed.">                .filter(file -&gt; !processedFiles.contains(file))</span>
+<span class="nc" id="L134">                .collect(Collectors.toList());</span>
+    }
+
+    private ProcessedFile.ProcessingStatus determineStatus(int recordsProcessed, int recordsFailed) {
+<span class="nc bnc" id="L138" title="All 4 branches missed.">        if (recordsProcessed == 0 &amp;&amp; recordsFailed &gt; 0) {</span>
+<span class="nc" id="L139">            return ProcessedFile.ProcessingStatus.FAILED;</span>
+<span class="nc bnc" id="L140" title="All 4 branches missed.">        } else if (recordsProcessed &gt; 0 &amp;&amp; recordsFailed &gt; 0) {</span>
+<span class="nc" id="L141">            return ProcessedFile.ProcessingStatus.PARTIAL_SUCCESS;</span>
+        } else {
+<span class="nc" id="L143">            return ProcessedFile.ProcessingStatus.SUCCESS;</span>
+        }
+    }
+} 
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

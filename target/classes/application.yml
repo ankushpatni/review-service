@@ -1,0 +1,61 @@
+spring:
+  application:
+    name: review-service
+  datasource:
+    url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5432/reviewdb}
+    username: ${DATASOURCE_USERNAME:postgres}
+    password: ${DATASOURCE_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: false
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: review-service-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: com.zuzu.reviewservice.application.dto
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    topics:
+      review-events: review-events
+
+server:
+  port: 8080
+
+aws:
+  s3:
+    region: ${AWS_REGION:us-east-1}
+    bucket-name: ${AWS_S3_BUCKET:review-data-bucket}
+    prefix: ${AWS_S3_PREFIX:reviews/}
+    endpoint-override: ${AWS_ENDPOINT_OVERRIDE:http://localhost:4566}
+    path-style-access: ${AWS_PATH_STYLE_ACCESS:false}
+    access-key: ${AWS_ACCESS_KEY:test}
+    secret-key: ${AWS_SECRET_KEY:test}
+
+review-service:
+  processing:
+    cron: ${REVIEW_PROCESSING_CRON:0 */1 * * * *}
+    processed-files-tracking-enabled: false
+  async:
+    core-pool-size: 5
+    max-pool-size: 10
+    queue-capacity: 25
+    thread-name-prefix: review-processing-
+
+logging:
+  level:
+    com.zuzu.reviewservice: ${LOG_LEVEL:INFO}
+    org.springframework: WARN
+    org.hibernate: WARN 

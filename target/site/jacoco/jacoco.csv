@@ -1,0 +1,27 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+Review Service,com.zuzu.reviewservice.config,AppConfig,27,0,0,0,9,0,3,0,3,0
+Review Service,com.zuzu.reviewservice.config,AwsConfig,46,0,6,0,11,0,5,0,2,0
+Review Service,com.zuzu.reviewservice.application.dto,ReviewerInfoDto,559,38,110,0,9,7,76,11,21,11
+Review Service,com.zuzu.reviewservice.application.dto,ReviewCommentDto,949,169,206,0,9,20,132,28,29,28
+Review Service,com.zuzu.reviewservice.application.dto,ProviderScoreDto,255,0,46,0,8,0,39,0,16,0
+Review Service,com.zuzu.reviewservice.application.dto,ReviewCommentDto.ReviewCommentDtoBuilder,138,97,0,0,0,1,18,10,18,10
+Review Service,com.zuzu.reviewservice.application.dto,ReviewDto.ReviewDtoBuilder,19,37,0,0,0,1,2,6,2,6
+Review Service,com.zuzu.reviewservice.application.dto,ReviewDto,206,53,46,0,1,8,29,11,6,11
+Review Service,com.zuzu.reviewservice.infrastructure.s3,S3ServiceImpl,75,68,0,0,9,24,0,5,0,5
+Review Service,com.zuzu.reviewservice.infrastructure.s3,S3Config,27,0,0,0,9,0,2,0,2,0
+Review Service,com.zuzu.reviewservice.application.service.impl,ProcessedFileServiceImpl,44,0,0,0,14,0,5,0,5,0
+Review Service,com.zuzu.reviewservice.application.service.impl,ReviewProcessingServiceImpl,291,0,22,0,60,0,18,0,7,0
+Review Service,com.zuzu.reviewservice.application.service.impl,ReviewServiceImpl,27,328,7,25,7,92,6,16,0,6
+Review Service,com.zuzu.reviewservice.presentation.job,ReviewProcessingJob,22,0,0,0,6,0,3,0,3,0
+Review Service,com.zuzu.reviewservice.domain.model,ReviewResponse.ReviewResponseBuilder,27,39,0,0,0,1,3,6,3,6
+Review Service,com.zuzu.reviewservice.domain.model,Hotel,109,19,22,0,2,4,18,4,7,4
+Review Service,com.zuzu.reviewservice.domain.model,ProcessedFile.ProcessingStatus,21,0,0,0,2,0,1,0,1,0
+Review Service,com.zuzu.reviewservice.domain.model,ProcessedFile,268,0,42,0,10,0,40,0,19,0
+Review Service,com.zuzu.reviewservice.domain.model,ReviewProvider,112,12,22,0,3,2,19,2,8,2
+Review Service,com.zuzu.reviewservice.domain.model,Hotel.HotelBuilder,6,21,0,0,0,1,1,4,1,4
+Review Service,com.zuzu.reviewservice.domain.model,Review.ReviewBuilder,84,119,0,0,0,1,8,16,8,16
+Review Service,com.zuzu.reviewservice.domain.model,Review,780,174,174,0,8,19,105,32,18,32
+Review Service,com.zuzu.reviewservice.domain.model,ProcessedFile.ProcessedFileBuilder,65,0,0,0,1,0,9,0,9,0
+Review Service,com.zuzu.reviewservice.domain.model,ReviewResponse,282,25,54,0,10,2,45,2,18,2
+Review Service,com.zuzu.reviewservice.presentation.controller,ReviewProcessingController,106,0,4,0,22,0,6,0,4,0
+Review Service,com.zuzu.reviewservice,ReviewServiceApplication,8,0,0,0,3,0,2,0,2,0

@@ -1,0 +1,27 @@
+spring:
+  datasource:
+    url: ${DATASOURCE_URL}
+    username: ${DATASOURCE_USERNAME}
+    password: ${DATASOURCE_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+aws:
+  s3:
+    region: ${AWS_REGION}
+    bucket-name: ${AWS_S3_BUCKET}
+    prefix: ${AWS_S3_PREFIX}
+    endpoint-override: ${AWS_ENDPOINT_OVERRIDE}
+    path-style-access: true
+
+review-service:
+  processing:
+    cron: ${REVIEW_PROCESSING_CRON}
+
+logging:
+  level:
+    com.zuzu.reviewservice: ${LOG_LEVEL:INFO} 

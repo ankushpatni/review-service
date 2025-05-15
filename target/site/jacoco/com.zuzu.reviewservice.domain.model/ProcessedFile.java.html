@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProcessedFile.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Review Service</a> &gt; <a href="index.source.html" class="el_package">com.zuzu.reviewservice.domain.model</a> &gt; <span class="el_source">ProcessedFile.java</span></div><h1>ProcessedFile.java</h1><pre class="source lang-java linenums">package com.zuzu.reviewservice.domain.model;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.math.BigInteger;
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = &quot;processed_files&quot;)
+<span class="nc bnc" id="L14" title="All 42 branches missed.">@Data</span>
+<span class="nc" id="L15">@Builder</span>
+<span class="nc" id="L16">@NoArgsConstructor</span>
+<span class="nc" id="L17">@AllArgsConstructor</span>
+public class ProcessedFile {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+<span class="nc" id="L22">    private Integer id;</span>
+
+    @Column(name = &quot;file_name&quot;, nullable = false, unique = true)
+<span class="nc" id="L25">    private String fileName;</span>
+
+    @Column(name = &quot;processed_date&quot;, nullable = false)
+<span class="nc" id="L28">    private LocalDateTime processedDate;</span>
+
+    @Column(name = &quot;status&quot;, nullable = false)
+    @Enumerated(EnumType.STRING)
+<span class="nc" id="L32">    private ProcessingStatus status;</span>
+
+    @Column(name = &quot;records_processed&quot;, nullable = false)
+<span class="nc" id="L35">    private int recordsProcessed;</span>
+
+    @Column(name = &quot;records_failed&quot;, nullable = false)
+<span class="nc" id="L38">    private int recordsFailed;</span>
+
+<span class="nc" id="L40">    public enum ProcessingStatus {</span>
+<span class="nc" id="L41">        SUCCESS, PARTIAL_SUCCESS, FAILED</span>
+    }
+} 
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
